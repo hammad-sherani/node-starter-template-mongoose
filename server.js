@@ -1,0 +1,42 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+import os from 'os';
+import { server } from './src/app.js'; 
+
+
+const port =  5000;
+
+server.listen(port, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${port}`);
+  console.log(`🔌 Socket.IO server ready for real-time notifications`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`🌐 Accessible on network: http://${getLocalIp()}:${port}`);
+  }
+});
+
+function getLocalIp() {
+  const interfaces = os.networkInterfaces();
+  for (const name in interfaces) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '0.0.0.0';
+}
+
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('👋 SIGINT received, shutting down gracefully');
+  server.close(() => {
+    process.exit(0);
+  });
+});
